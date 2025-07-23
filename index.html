@@ -1,28 +1,141 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="ru">
 <head>
-  <meta charset="UTF-8">
-  <title>STL Viewer на stl_web_viewer2</title>
-  <script src="https://code.jquery.com/jquery-1.12.4.min.js"
-          integrity="sha256-ZosEbRLbNQzLpnKIkEdrPv7lOy9C27hHQ+Xp8a4MxAQ="
-          crossorigin="anonymous"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/106/three.min.js"
-          integrity="sha256-tAVw6WRAXc3td2Esrjd28l54s3P2y7CDFu1271mu5LE="
-          crossorigin="anonymous"></script>
-  <link rel="stylesheet"
-        href="https://brentyi.github.io/stl_web_viewer2/build/stlwebviewer2.css" />
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Прайс-лист</title>
   <style>
-    body { font-family: Arial, sans-serif; padding: 20px; }
-    .stlwv2-model { width: 600px; height: 400px; margin-top: 20px; border: 1px solid #ccc; }
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      margin: 0;
+      padding: 20px;
+      background: #f8f9fa;
+    }
+
+    .price-list {
+      max-width: 600px;
+      margin: auto;
+      background: #fff;
+      border-radius: 12px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+      overflow: hidden;
+    }
+
+    .category {
+      border-top: 1px solid #eee;
+    }
+
+    .category:first-child {
+      border-top: none;
+    }
+
+    .category-header {
+      cursor: pointer;
+      padding: 15px 20px;
+      font-size: 18px;
+      font-weight: bold;
+      background: #f1f1f1;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      transition: background 0.3s ease;
+    }
+
+    .category-header:hover {
+      background: #eaeaea;
+    }
+
+    .category-body {
+      display: none;
+      padding: 10px 20px 15px;
+      animation: fadeIn 0.3s ease;
+    }
+
+    .item {
+      display: flex;
+      justify-content: space-between;
+      padding: 8px 0;
+      border-bottom: 1px dashed #ddd;
+    }
+
+    .item:last-child {
+      border-bottom: none;
+    }
+
+    .price {
+      color: #2d9c5f;
+      font-weight: 600;
+    }
+
+    .arrow {
+      transition: transform 0.3s ease;
+    }
+
+    .open .arrow {
+      transform: rotate(90deg);
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(-5px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
   </style>
 </head>
 <body>
 
-<h1>STL Viewer на stl_web_viewer2</h1>
+<div class="price-list">
+  <div class="category">
+    <div class="category-header" onclick="toggleCategory(this)">
+      3D Печать
+      <span class="arrow">▶</span>
+    </div>
+    <div class="category-body">
+      <div class="item"><span>PLA, PETG (грамм)</span><span class="price">20 ₽</span></div>
+      <div class="item"><span>ABS (грамм)</span><span class="price">25 ₽</span></div>
+      <div class="item"><span>TPU (грамм)</span><span class="price">30 ₽</span></div>
+    </div>
+  </div>
 
-<!-- Укажи URL STL-файла -->
-<div class="stlwv2-model" data-model-url="models/test.stl"></div>
+  <div class="category">
+    <div class="category-header" onclick="toggleCategory(this)">
+      Постобработка
+      <span class="arrow">▶</span>
+    </div>
+    <div class="category-body">
+      <div class="item"><span>Шлифовка</span><span class="price">от 100 ₽</span></div>
+      <div class="item"><span>Покраска</span><span class="price">от 300 ₽</span></div>
+    </div>
+  </div>
 
-<script src="https://brentyi.github.io/stl_web_viewer2/build/stlwebviewer2.js"></script>
+  <div class="category">
+    <div class="category-header" onclick="toggleCategory(this)">
+      Дополнительные услуги
+      <span class="arrow">▶</span>
+    </div>
+    <div class="category-body">
+      <div class="item"><span>Разработка модели</span><span class="price">от 500 ₽</span></div>
+      <div class="item"><span>Консультация</span><span class="price">Бесплатно</span></div>
+    </div>
+  </div>
+</div>
+
+<script>
+  function toggleCategory(header) {
+    const category = header.parentElement;
+    const body = category.querySelector('.category-body');
+    const isOpen = category.classList.contains('open');
+
+    document.querySelectorAll('.category').forEach(cat => {
+      cat.classList.remove('open');
+      cat.querySelector('.category-body').style.display = 'none';
+    });
+
+    if (!isOpen) {
+      category.classList.add('open');
+      body.style.display = 'block';
+    }
+  }
+</script>
+
 </body>
 </html>
