@@ -1,42 +1,28 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="ru">
 <head>
-  <meta charset="UTF-8" />
-  <title>STL Viewer — MeshLabJS</title>
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/cnr-isti-vclab/meshlabjs@master/meshlabjs.css" />
+  <meta charset="UTF-8">
+  <title>STL Viewer на stl_web_viewer2</title>
+  <script src="https://code.jquery.com/jquery-1.12.4.min.js"
+          integrity="sha256-ZosEbRLbNQzLpnKIkEdrPv7lOy9C27hHQ+Xp8a4MxAQ="
+          crossorigin="anonymous"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/106/three.min.js"
+          integrity="sha256-tAVw6WRAXc3td2Esrjd28l54s3P2y7CDFu1271mu5LE="
+          crossorigin="anonymous"></script>
+  <link rel="stylesheet"
+        href="https://brentyi.github.io/stl_web_viewer2/build/stlwebviewer2.css" />
   <style>
-    body { margin: 0; background: #f0f0f0; font-family: sans-serif; text-align: center; padding: 20px; }
-    #viewer { width: 90vw; height: 80vh; margin: 0 auto; border: 1px solid #ccc; }
-    input { margin-top: 10px; font-size: 16px; }
+    body { font-family: Arial, sans-serif; padding: 20px; }
+    .stlwv2-model { width: 600px; height: 400px; margin-top: 20px; border: 1px solid #ccc; }
   </style>
 </head>
 <body>
 
-<h2>STL-просмотрщик на базе MeshLabJS</h2>
-<input type="file" id="file" accept=".stl" />
-<div id="viewer"></div>
+<h1>STL Viewer на stl_web_viewer2</h1>
 
-<script src="https://cdn.jsdelivr.net/gh/cnr-isti-vclab/meshlabjs@master/meshlabjs.min.js"></script>
-<script>
-  const viewerElement = document.getElementById('viewer');
-  const fileInput = document.getElementById('file');
-  const viewer = new MeshLabJS.Viewer(viewerElement);
+<!-- Укажи URL STL-файла -->
+<div class="stlwv2-model" data-model-url="models/test.stl"></div>
 
-  fileInput.addEventListener('change', async (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
-
-    const buffer = await file.arrayBuffer();
-
-    try {
-      await viewer.loadMeshFromBuffer(buffer, file.name);
-      viewer.resetView();
-    } catch (error) {
-      alert("Ошибка загрузки STL: " + error.message);
-      console.error(error);
-    }
-  });
-</script>
-
+<script src="https://brentyi.github.io/stl_web_viewer2/build/stlwebviewer2.js"></script>
 </body>
 </html>
