@@ -2,77 +2,79 @@
 <html lang="ru">
 <head>
   <meta charset="UTF-8" />
-  <title>3D STL Viewer</title>
+  <title>STL Viewer Test</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <script src="https://cdn.jsdelivr.net/npm/three@0.148.0/build/three.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/three@0.148.0/examples/js/loaders/STLLoader.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/three@0.148.0/examples/js/controls/OrbitControls.js"></script>
   <style>
-    body { margin: 0; font-family: Arial, sans-serif; padding: 20px; background: #f5f5f5; }
-    #viewer { width: 100%; max-width: 600px; height: 400px; background: #ddd; margin-top: 20px; }
-    input, button { font-size: 16px; padding: 10px; margin-top: 10px; max-width: 400px; width: 100%; }
-    #info { margin-top: 10px; font-weight: bold; }
+    body { margin:0; font-family: Arial; padding: 20px; background: #f5f5f5; }
+    #viewer { width: 600px; height: 400px; background: #ccc; margin-top: 20px; }
+    input { font-size: 16px; padding: 10px; width: 300px; }
   </style>
 </head>
 <body>
 
-<h1>3D STL Viewer</h1>
+<h2>Загрузите STL файл</h2>
 <input type="file" id="fileInput" accept=".stl" />
-<div id="info"></div>
 <div id="viewer"></div>
+<div id="status"></div>
 
 <script>
-  let scene, camera, renderer, controls, mesh, geometry;
-
-  init();
+  let scene, camera, renderer, controls, mesh;
 
   function init() {
     const container = document.getElementById('viewer');
 
     scene = new THREE.Scene();
-    camera = new THREE.PerspectiveCamera(75, container.clientWidth / container.clientHeight, 0.1, 1000);
-    camera.position.set(0, 0, 100);
+    camera = new THREE.PerspectiveCamera(75, 600 / 400, 0.1, 1000);
+    camera.position.z = 100;
 
-    renderer = new THREE.WebGLRenderer({ antialias: true });
-    renderer.setSize(container.clientWidth, container.clientHeight);
+    renderer = new THREE.WebGLRenderer({antialias: true});
+    renderer.setSize(600, 400);
     container.appendChild(renderer.domElement);
 
     controls = new THREE.OrbitControls(camera, renderer.domElement);
-    controls.enableDamping = true;
 
-    const light1 = new THREE.DirectionalLight(0xffffff, 0.8);
-    light1.position.set(1, 1, 1);
-    scene.add(light1);
+    const light = new THREE.DirectionalLight(0xffffff, 1);
+    light.position.set(0, 0, 100);
+    scene.add(light);
 
-    const light2 = new THREE.AmbientLight(0x404040);
-    scene.add(light2);
+    const ambient = new THREE.AmbientLight(0x404040);
+    scene.add(ambient);
 
     animate();
   }
 
-  document.getElementById('fileInput').addEventListener('change', function(event) {
-    const file = event.target.files[0];
-    if (!file) return;
+  function animate() {
+    requestAnimationFrame(animate);
+    if(mesh) mesh.rotation.z += 0.005;
+    controls.update();
+    renderer.render(scene, camera);
+  }
 
-    if (!file.name.toLowerCase().endsWith('.stl')) {
-      alert('Пожалуйста, выберите файл с расширением .stl');
+  document.getElementById('fileInput').addEventListener('change', function(e) {
+    const file = e.target.files[0];
+    if(!file) return;
+    if(!file.name.toLowerCase().endsWith('.stl')) {
+      alert('Пожалуйста, выберите STL файл.');
       return;
     }
 
     const reader = new FileReader();
-    reader.onload = function(e) {
+    reader.onload = function(ev) {
       try {
         const loader = new THREE.STLLoader();
-        geometry = loader.parse(e.target.result);
+        const geometry = loader.parse(ev.target.result);
 
-        if (mesh) {
+        if(mesh) {
           scene.remove(mesh);
           mesh.geometry.dispose();
           mesh.material.dispose();
           mesh = null;
         }
 
-        const material = new THREE.MeshLambertMaterial({ color: 0xff5533 });
+        const material = new THREE.MeshLambertMaterial({color: 0xff5533});
         mesh = new THREE.Mesh(geometry, material);
 
         geometry.computeBoundingBox();
@@ -84,20 +86,15 @@
         mesh.rotation.x = -Math.PI / 2;
         scene.add(mesh);
 
-        document.getElementById('info').textContent = `Загружен файл: ${file.name}`;
+        document.getElementById('status').textContent = `Загружен файл: ${file.name}`;
       } catch (err) {
-        alert('Ошибка загрузки STL: ' + err.message);
+        alert('Ошибка при загрузке STL: ' + err.message);
       }
     };
     reader.readAsArrayBuffer(file);
   });
 
-  function animate() {
-    requestAnimationFrame(animate);
-    controls.update();
-    if(mesh) mesh.rotation.z += 0.005;
-    renderer.render(scene, camera);
-  }
+  init();
 </script>
 
 </body>
