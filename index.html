@@ -4,26 +4,22 @@
   <meta charset="UTF-8" />
   <title>Калькулятор 3D-печати по STL</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <!-- THREE.js и STLLoader из CDN -->
+  <!-- THREE.js -->
   <script src="https://cdn.jsdelivr.net/npm/three@0.148.0/build/three.min.js"></script>
+  <!-- STLLoader -->
   <script src="https://cdn.jsdelivr.net/npm/three@0.148.0/examples/js/loaders/STLLoader.js"></script>
   <style>
     body {
       font-family: Arial, sans-serif;
-      background: #f5f5f5;
       padding: 20px;
-      margin: 0;
-    }
-    h1, h2 {
-      color: #333;
+      background: #f5f5f5;
     }
     input, select, button {
-      padding: 10px;
       margin-top: 10px;
       font-size: 16px;
       width: 100%;
       max-width: 400px;
-      box-sizing: border-box;
+      padding: 10px;
     }
     .viewer {
       width: 100%;
@@ -34,15 +30,14 @@
     }
     #result {
       margin-top: 20px;
-      font-size: 18px;
       font-weight: bold;
-      color: #222;
+      font-size: 18px;
     }
   </style>
 </head>
 <body>
 
-  <h1>Калькулятор стоимости 3D-печати</h1>
+  <h1>Калькулятор 3D-печати</h1>
 
   <input type="file" id="stlFile" accept=".stl" />
   <div id="fileName"></div>
@@ -75,32 +70,46 @@
     light.position.set(0, 0, 100).normalize();
     scene.add(light);
 
-    let stlMesh, geometry;
+    let stlMesh = null;
+    let geometry = null;
 
     document.getElementById("stlFile").addEventListener("change", function (e) {
       const file = e.target.files[0];
-      if (!file || !file.name.endsWith('.stl')) return;
+      if (!file || !file.name.toLowerCase().endsWith('.stl')) {
+        alert("Пожалуйста, выберите STL-файл.");
+        return;
+      }
 
       document.getElementById("fileName").textContent = `Файл: ${file.name}`;
 
       const reader = new FileReader();
       reader.onload = function (event) {
-        const loader = new THREE.STLLoader();
-        geometry = loader.parse(event.target.result);
+        try {
+          const loader = new THREE.STLLoader();
+          geometry = loader.parse(event.target.result);
 
-        if (stlMesh) scene.remove(stlMesh);
+          if (stlMesh) {
+            scene.remove(stlMesh);
+            stlMesh.geometry.dispose();
+            stlMesh.material.dispose();
+            stlMesh = null;
+          }
 
-        const material = new THREE.MeshLambertMaterial({ color: 0xff5533 });
-        stlMesh = new THREE.Mesh(geometry, material);
+          const material = new THREE.MeshLambertMaterial({ color: 0xff5533 });
+          stlMesh = new THREE.Mesh(geometry, material);
 
-        geometry.computeBoundingBox();
-        const size = geometry.boundingBox.getSize(new THREE.Vector3());
-        const maxDim = Math.max(size.x, size.y, size.z);
-        stlMesh.scale.set(50 / maxDim, 50 / maxDim, 50 / maxDim);
+          geometry.computeBoundingBox();
+          const size = geometry.boundingBox.getSize(new THREE.Vector3());
+          const maxDim = Math.max(size.x, size.y, size.z);
+          const scale = 50 / maxDim;
+          stlMesh.scale.set(scale, scale, scale);
 
-        stlMesh.rotation.x = -Math.PI / 2;
-        scene.add(stlMesh);
-        animate();
+          stlMesh.rotation.x = -Math.PI / 2;
+          scene.add(stlMesh);
+          animate();
+        } catch (err) {
+          alert("Ошибка при загрузке STL: " + err.message);
+        }
       };
       reader.readAsArrayBuffer(file);
     });
@@ -113,7 +122,7 @@
 
     function calculate() {
       if (!geometry) {
-        document.getElementById("result").textContent = "Сначала загрузите STL-файл.";
+        alert("Сначала загрузите STL-файл.");
         return;
       }
 
@@ -124,7 +133,7 @@
       const volume_cm3 = volume_mm3 / 1000;       // см³
       const weight = volume_cm3 * density;        // г
 
-      const cost = Math.max(weight * materialPrice, 300); // мин. 300 ₽
+      const cost = Math.max(weight * materialPrice, 300); // минимальная цена 300 ₽
 
       document.getElementById("result").innerHTML =
         `📐 Объём: ${volume_cm3.toFixed(2)} см³<br>` +
