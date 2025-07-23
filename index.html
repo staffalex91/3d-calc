@@ -1,0 +1,176 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <meta http-equiv="Content-Style-Type" content="text/css">
+  <title></title>
+  <meta name="Generator" content="Cocoa HTML Writer">
+  <meta name="CocoaVersion" content="2575.6">
+  <style type="text/css">
+    p.p1 {margin: 0.0px 0.0px 0.0px 0.0px; font: 12.0px Helvetica}
+    p.p2 {margin: 0.0px 0.0px 0.0px 0.0px; font: 12.0px Helvetica; min-height: 14.0px}
+  </style>
+</head>
+<body>
+<p class="p1">&lt;!DOCTYPE html&gt;</p>
+<p class="p1">&lt;html lang="ru"&gt;</p>
+<p class="p1">&lt;head&gt;</p>
+<p class="p1"><span class="Apple-converted-space">  </span>&lt;meta charset="UTF-8" /&gt;</p>
+<p class="p1"><span class="Apple-converted-space">  </span>&lt;title&gt;Калькулятор 3D-печати по STL&lt;/title&gt;</p>
+<p class="p1"><span class="Apple-converted-space">  </span>&lt;meta name="viewport" content="width=device-width, initial-scale=1" /&gt;</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">  </span>&lt;!-- Подключение библиотек --&gt;</p>
+<p class="p1"><span class="Apple-converted-space">  </span>&lt;script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r148/three.min.js"&gt;&lt;/script&gt;</p>
+<p class="p1"><span class="Apple-converted-space">  </span>&lt;script src="https://cdn.jsdelivr.net/npm/three@0.148.0/examples/js/loaders/STLLoader.js"&gt;&lt;/script&gt;</p>
+<p class="p1"><span class="Apple-converted-space">  </span>&lt;script src="https://cdn.jsdelivr.net/npm/three@0.148.0/examples/js/utils/BufferGeometryUtils.js"&gt;&lt;/script&gt;</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">  </span>&lt;style&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>body {</p>
+<p class="p1"><span class="Apple-converted-space">      </span>font-family: Arial, sans-serif;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>background: #f5f5f5;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>padding: 20px;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>margin: 0;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>}</p>
+<p class="p1"><span class="Apple-converted-space">    </span>h1, h2 {</p>
+<p class="p1"><span class="Apple-converted-space">      </span>color: #333;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>}</p>
+<p class="p1"><span class="Apple-converted-space">    </span>input, select, button {</p>
+<p class="p1"><span class="Apple-converted-space">      </span>padding: 10px;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>margin-top: 10px;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>font-size: 16px;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>width: 100%;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>max-width: 400px;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>box-sizing: border-box;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>}</p>
+<p class="p1"><span class="Apple-converted-space">    </span>.viewer {</p>
+<p class="p1"><span class="Apple-converted-space">      </span>width: 100%;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>max-width: 600px;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>height: 400px;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>background: #eee;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>margin-top: 20px;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>}</p>
+<p class="p1"><span class="Apple-converted-space">    </span>#result {</p>
+<p class="p1"><span class="Apple-converted-space">      </span>margin-top: 20px;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>font-size: 18px;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>font-weight: bold;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>color: #222;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>}</p>
+<p class="p1"><span class="Apple-converted-space">  </span>&lt;/style&gt;</p>
+<p class="p1">&lt;/head&gt;</p>
+<p class="p1">&lt;body&gt;</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">  </span>&lt;h1&gt;Калькулятор стоимости 3D-печати&lt;/h1&gt;</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">  </span>&lt;input type="file" id="stlFile" accept=".stl" /&gt;</p>
+<p class="p1"><span class="Apple-converted-space">  </span>&lt;div id="fileName"&gt;&lt;/div&gt;</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">  </span>&lt;label for="material"&gt;Материал:&lt;/label&gt;</p>
+<p class="p1"><span class="Apple-converted-space">  </span>&lt;select id="material"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;option value="20"&gt;PLA / PETG — 20 ₽/г&lt;/option&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;option value="25"&gt;ABS — 25 ₽/г&lt;/option&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;option value="30"&gt;TPU — 30 ₽/г&lt;/option&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;option value="40"&gt;Нейлон — 40 ₽/г&lt;/option&gt;</p>
+<p class="p1"><span class="Apple-converted-space">  </span>&lt;/select&gt;</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">  </span>&lt;button onclick="calculate()"&gt;Рассчитать&lt;/button&gt;</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">  </span>&lt;div id="result"&gt;&lt;/div&gt;</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">  </span>&lt;h2&gt;3D-просмотр модели&lt;/h2&gt;</p>
+<p class="p1"><span class="Apple-converted-space">  </span>&lt;div id="viewer" class="viewer"&gt;&lt;/div&gt;</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">  </span>&lt;script&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>const viewer = document.getElementById("viewer");</p>
+<p class="p1"><span class="Apple-converted-space">    </span>const scene = new THREE.Scene();</p>
+<p class="p1"><span class="Apple-converted-space">    </span>const camera = new THREE.PerspectiveCamera(75, viewer.clientWidth / viewer.clientHeight, 0.1, 1000);</p>
+<p class="p1"><span class="Apple-converted-space">    </span>const renderer = new THREE.WebGLRenderer({ antialias: true });</p>
+<p class="p1"><span class="Apple-converted-space">    </span>renderer.setSize(viewer.clientWidth, viewer.clientHeight);</p>
+<p class="p1"><span class="Apple-converted-space">    </span>viewer.appendChild(renderer.domElement);</p>
+<p class="p1"><span class="Apple-converted-space">    </span>camera.position.z = 100;</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">    </span>const light = new THREE.DirectionalLight(0xffffff, 1);</p>
+<p class="p1"><span class="Apple-converted-space">    </span>light.position.set(0, 0, 100).normalize();</p>
+<p class="p1"><span class="Apple-converted-space">    </span>scene.add(light);</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">    </span>let stlMesh, geometry;</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">    </span>document.getElementById("stlFile").addEventListener("change", function (e) {</p>
+<p class="p1"><span class="Apple-converted-space">      </span>const file = e.target.files[0];</p>
+<p class="p1"><span class="Apple-converted-space">      </span>if (!file || !file.name.endsWith('.stl')) return;</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">      </span>document.getElementById("fileName").textContent = `Файл: ${file.name}`;</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">      </span>const reader = new FileReader();</p>
+<p class="p1"><span class="Apple-converted-space">      </span>reader.onload = function (event) {</p>
+<p class="p1"><span class="Apple-converted-space">        </span>const loader = new THREE.STLLoader();</p>
+<p class="p1"><span class="Apple-converted-space">        </span>geometry = loader.parse(event.target.result);</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">        </span>if (stlMesh) scene.remove(stlMesh);</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">        </span>const material = new THREE.MeshLambertMaterial({ color: 0xff5533 });</p>
+<p class="p1"><span class="Apple-converted-space">        </span>stlMesh = new THREE.Mesh(geometry, material);</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">        </span>geometry.computeBoundingBox();</p>
+<p class="p1"><span class="Apple-converted-space">        </span>const size = geometry.boundingBox.getSize(new THREE.Vector3());</p>
+<p class="p1"><span class="Apple-converted-space">        </span>const maxDim = Math.max(size.x, size.y, size.z);</p>
+<p class="p1"><span class="Apple-converted-space">        </span>stlMesh.scale.set(50 / maxDim, 50 / maxDim, 50 / maxDim);</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">        </span>stlMesh.rotation.x = -Math.PI / 2;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>scene.add(stlMesh);</p>
+<p class="p1"><span class="Apple-converted-space">        </span>animate();</p>
+<p class="p1"><span class="Apple-converted-space">      </span>};</p>
+<p class="p1"><span class="Apple-converted-space">      </span>reader.readAsArrayBuffer(file);</p>
+<p class="p1"><span class="Apple-converted-space">    </span>});</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">    </span>function animate() {</p>
+<p class="p1"><span class="Apple-converted-space">      </span>requestAnimationFrame(animate);</p>
+<p class="p1"><span class="Apple-converted-space">      </span>if (stlMesh) stlMesh.rotation.z += 0.01;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>renderer.render(scene, camera);</p>
+<p class="p1"><span class="Apple-converted-space">    </span>}</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">    </span>function calculate() {</p>
+<p class="p1"><span class="Apple-converted-space">      </span>if (!geometry) {</p>
+<p class="p1"><span class="Apple-converted-space">        </span>document.getElementById("result").textContent = "Сначала загрузите STL-файл.";</p>
+<p class="p1"><span class="Apple-converted-space">        </span>return;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>}</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">      </span>const materialPrice = parseFloat(document.getElementById("material").value);</p>
+<p class="p1"><span class="Apple-converted-space">      </span>const density = 1.3; // г/см³</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">      </span>const volume_mm3 = computeVolume(geometry); // мм³</p>
+<p class="p1"><span class="Apple-converted-space">      </span>const volume_cm3 = volume_mm3 / 1000; <span class="Apple-converted-space">      </span>// см³</p>
+<p class="p1"><span class="Apple-converted-space">      </span>const weight = volume_cm3 * density;<span class="Apple-converted-space">        </span>// г</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">      </span>const cost = Math.max(weight * materialPrice, 300); // мин. 300 ₽</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">      </span>document.getElementById("result").innerHTML =</p>
+<p class="p1"><span class="Apple-converted-space">        </span>`📐 Объём: ${volume_cm3.toFixed(2)} см³&lt;br&gt;` +</p>
+<p class="p1"><span class="Apple-converted-space">        </span>`⚖️ Вес: ${weight.toFixed(1)} г&lt;br&gt;` +</p>
+<p class="p1"><span class="Apple-converted-space">        </span>`💰 Стоимость: ${cost.toFixed(0)} ₽`;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>}</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">    </span>function computeVolume(geometry) {</p>
+<p class="p1"><span class="Apple-converted-space">      </span>let totalVolume = 0;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>const pos = geometry.attributes.position;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>for (let i = 0; i &lt; pos.count; i += 3) {</p>
+<p class="p1"><span class="Apple-converted-space">        </span>const ax = pos.getX(i), ay = pos.getY(i), az = pos.getZ(i);</p>
+<p class="p1"><span class="Apple-converted-space">        </span>const bx = pos.getX(i + 1), by = pos.getY(i + 1), bz = pos.getZ(i + 1);</p>
+<p class="p1"><span class="Apple-converted-space">        </span>const cx = pos.getX(i + 2), cy = pos.getY(i + 2), cz = pos.getZ(i + 2);</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">        </span>const v321 = cx * by * az;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>const v231 = bx * cy * az;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>const v312 = cx * ay * bz;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>const v132 = ax * cy * bz;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>const v213 = bx * ay * cz;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>const v123 = ax * by * cz;</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">        </span>totalVolume += (-v321 + v231 + v312 - v132 - v213 + v123);</p>
+<p class="p1"><span class="Apple-converted-space">      </span>}</p>
+<p class="p1"><span class="Apple-converted-space">      </span>return Math.abs(totalVolume / 6.0);</p>
+<p class="p1"><span class="Apple-converted-space">    </span>}</p>
+<p class="p1"><span class="Apple-converted-space">  </span>&lt;/script&gt;</p>
+<p class="p2"><br></p>
+<p class="p1">&lt;/body&gt;</p>
+<p class="p1">&lt;/html&gt;</p>
+</body>
+</html>
