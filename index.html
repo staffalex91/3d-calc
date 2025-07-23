@@ -2,73 +2,40 @@
 <html lang="ru">
 <head>
   <meta charset="UTF-8" />
-  <title>STLLoader модульный пример</title>
-  <style>body { margin: 0; }</style>
+  <title>MeshLabJS STL просмотрщик</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/cnr-isti-vclab/meshlabjs@master/meshlabjs.css" />
+  <style>
+    body { margin: 0; font-family: Arial; background: #f5f5f5; padding: 10px; }
+    #viewer { width: 800px; height: 600px; margin-top: 20px; border: 1px solid #ccc; }
+  </style>
 </head>
 <body>
 
+<h1>Просмотр STL с MeshLabJS</h1>
+
 <input type="file" id="file" accept=".stl" />
 
-<div id="viewer" style="width:600px; height:400px;"></div>
+<div id="viewer"></div>
 
-<script type="module">
-  import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.148.0/build/three.module.js';
-  import { STLLoader } from 'https://cdn.jsdelivr.net/npm/three@0.148.0/examples/jsm/loaders/STLLoader.js';
-  import { OrbitControls } from 'https://cdn.jsdelivr.net/npm/three@0.148.0/examples/jsm/controls/OrbitControls.js';
-
+<script src="https://cdn.jsdelivr.net/gh/cnr-isti-vclab/meshlabjs@master/meshlabjs.min.js"></script>
+<script>
   const viewer = document.getElementById('viewer');
-  const scene = new THREE.Scene();
-  const camera = new THREE.PerspectiveCamera(75, viewer.clientWidth / viewer.clientHeight, 0.1, 1000);
-  camera.position.z = 100;
 
-  const renderer = new THREE.WebGLRenderer({ antialias: true });
-  renderer.setSize(viewer.clientWidth, viewer.clientHeight);
-  viewer.appendChild(renderer.domElement);
+  const meshLab = new MeshLabJS.Viewer(viewer);
 
-  const controls = new OrbitControls(camera, renderer.domElement);
-
-  const light = new THREE.DirectionalLight(0xffffff, 1);
-  light.position.set(0, 0, 100).normalize();
-  scene.add(light);
-
-  let mesh;
-
-  document.getElementById('file').addEventListener('change', (event) => {
+  document.getElementById('file').addEventListener('change', async (event) => {
     const file = event.target.files[0];
     if (!file) return;
-    const reader = new FileReader();
-    reader.onload = function(e) {
-      const loader = new STLLoader();
-      const geometry = loader.parse(e.target.result);
 
-      if(mesh) {
-        scene.remove(mesh);
-        mesh.geometry.dispose();
-        mesh.material.dispose();
-      }
+    const arrayBuffer = await file.arrayBuffer();
+    const filename = file.name;
 
-      const material = new THREE.MeshLambertMaterial({ color: 0xff5533 });
-      mesh = new THREE.Mesh(geometry, material);
+    // Загрузим модель из ArrayBuffer (для STL формат)
+    await meshLab.loadMeshFromBuffer(arrayBuffer, filename);
 
-      geometry.computeBoundingBox();
-      const size = geometry.boundingBox.getSize(new THREE.Vector3());
-      const maxDim = Math.max(size.x, size.y, size.z);
-      const scale = 50 / maxDim;
-      mesh.scale.set(scale, scale, scale);
-      mesh.rotation.x = -Math.PI / 2;
-
-      scene.add(mesh);
-    };
-    reader.readAsArrayBuffer(file);
+    // Автоматически настроить камеру и освещение
+    meshLab.resetView();
   });
-
-  function animate() {
-    requestAnimationFrame(animate);
-    if(mesh) mesh.rotation.z += 0.005;
-    controls.update();
-    renderer.render(scene, camera);
-  }
-  animate();
 </script>
 
 </body>
