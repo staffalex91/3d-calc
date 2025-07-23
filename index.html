@@ -1,40 +1,35 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-  <meta charset="UTF-8" />
-  <title>MeshLabJS STL просмотрщик</title>
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/cnr-isti-vclab/meshlabjs@master/meshlabjs.css" />
+  <meta charset="UTF-8">
+  <title>Просмотр STL с помощью MeshLabJS</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/cnr-isti-vclab/meshlabjs@master/meshlabjs.css">
   <style>
-    body { margin: 0; font-family: Arial; background: #f5f5f5; padding: 10px; }
-    #viewer { width: 800px; height: 600px; margin-top: 20px; border: 1px solid #ccc; }
+    body { margin: 0; padding: 20px; font-family: Arial; background: #f5f5f5; }
+    #viewer { width: 100%; height: 600px; border: 1px solid #ccc; }
   </style>
 </head>
 <body>
 
-<h1>Просмотр STL с MeshLabJS</h1>
-
-<input type="file" id="file" accept=".stl" />
+<h1>MeshLabJS STL Viewer</h1>
+<input type="file" id="fileInput" accept=".stl" />
 
 <div id="viewer"></div>
 
 <script src="https://cdn.jsdelivr.net/gh/cnr-isti-vclab/meshlabjs@master/meshlabjs.min.js"></script>
 <script>
-  const viewer = document.getElementById('viewer');
+  let viewer = new MeshLabJS.Viewer(document.getElementById('viewer'));
 
-  const meshLab = new MeshLabJS.Viewer(viewer);
-
-  document.getElementById('file').addEventListener('change', async (event) => {
-    const file = event.target.files[0];
+  document.getElementById('fileInput').addEventListener('change', async (e) => {
+    const file = e.target.files[0];
     if (!file) return;
 
     const arrayBuffer = await file.arrayBuffer();
-    const filename = file.name;
+    const blob = new Blob([arrayBuffer], { type: 'application/octet-stream' });
+    const fileObj = new File([blob], file.name, { type: 'application/octet-stream' });
 
-    // Загрузим модель из ArrayBuffer (для STL формат)
-    await meshLab.loadMeshFromBuffer(arrayBuffer, filename);
-
-    // Автоматически настроить камеру и освещение
-    meshLab.resetView();
+    await viewer.loadMeshFile(fileObj);
+    viewer.resetView();
   });
 </script>
 
