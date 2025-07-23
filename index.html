@@ -4,22 +4,23 @@
   <meta charset="UTF-8" />
   <title>Калькулятор 3D-печати по STL</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <!-- THREE.js -->
   <script src="https://cdn.jsdelivr.net/npm/three@0.148.0/build/three.min.js"></script>
-  <!-- STLLoader -->
   <script src="https://cdn.jsdelivr.net/npm/three@0.148.0/examples/js/loaders/STLLoader.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.148.0/examples/js/controls/OrbitControls.js"></script>
   <style>
     body {
       font-family: Arial, sans-serif;
-      padding: 20px;
       background: #f5f5f5;
+      padding: 20px;
+      margin: 0;
     }
     input, select, button {
+      padding: 10px;
       margin-top: 10px;
       font-size: 16px;
       width: 100%;
       max-width: 400px;
-      padding: 10px;
+      box-sizing: border-box;
     }
     .viewer {
       width: 100%;
@@ -30,14 +31,15 @@
     }
     #result {
       margin-top: 20px;
-      font-weight: bold;
       font-size: 18px;
+      font-weight: bold;
+      color: #222;
     }
   </style>
 </head>
 <body>
 
-  <h1>Калькулятор 3D-печати</h1>
+  <h1>Калькулятор стоимости 3D-печати</h1>
 
   <input type="file" id="stlFile" accept=".stl" />
   <div id="fileName"></div>
@@ -66,6 +68,8 @@
     viewer.appendChild(renderer.domElement);
     camera.position.z = 100;
 
+    const controls = new THREE.OrbitControls(camera, renderer.domElement);
+
     const light = new THREE.DirectionalLight(0xffffff, 1);
     light.position.set(0, 0, 100).normalize();
     scene.add(light);
@@ -76,7 +80,7 @@
     document.getElementById("stlFile").addEventListener("change", function (e) {
       const file = e.target.files[0];
       if (!file || !file.name.toLowerCase().endsWith('.stl')) {
-        alert("Пожалуйста, выберите STL-файл.");
+        alert("Пожалуйста, выберите файл с расширением .stl");
         return;
       }
 
@@ -116,13 +120,14 @@
 
     function animate() {
       requestAnimationFrame(animate);
-      if (stlMesh) stlMesh.rotation.z += 0.01;
+      controls.update();
+      if (stlMesh) stlMesh.rotation.z += 0.005; // можно убрать вращение
       renderer.render(scene, camera);
     }
 
     function calculate() {
       if (!geometry) {
-        alert("Сначала загрузите STL-файл.");
+        document.getElementById("result").textContent = "Сначала загрузите STL-файл.";
         return;
       }
 
