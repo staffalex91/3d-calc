@@ -1,35 +1,40 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-  <meta charset="UTF-8">
-  <title>Просмотр STL с помощью MeshLabJS</title>
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/cnr-isti-vclab/meshlabjs@master/meshlabjs.css">
+  <meta charset="UTF-8" />
+  <title>STL Viewer — MeshLabJS</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/cnr-isti-vclab/meshlabjs@master/meshlabjs.css" />
   <style>
-    body { margin: 0; padding: 20px; font-family: Arial; background: #f5f5f5; }
-    #viewer { width: 100%; height: 600px; border: 1px solid #ccc; }
+    body { margin: 0; background: #f0f0f0; font-family: sans-serif; text-align: center; padding: 20px; }
+    #viewer { width: 90vw; height: 80vh; margin: 0 auto; border: 1px solid #ccc; }
+    input { margin-top: 10px; font-size: 16px; }
   </style>
 </head>
 <body>
 
-<h1>MeshLabJS STL Viewer</h1>
-<input type="file" id="fileInput" accept=".stl" />
-
+<h2>STL-просмотрщик на базе MeshLabJS</h2>
+<input type="file" id="file" accept=".stl" />
 <div id="viewer"></div>
 
 <script src="https://cdn.jsdelivr.net/gh/cnr-isti-vclab/meshlabjs@master/meshlabjs.min.js"></script>
 <script>
-  let viewer = new MeshLabJS.Viewer(document.getElementById('viewer'));
+  const viewerElement = document.getElementById('viewer');
+  const fileInput = document.getElementById('file');
+  const viewer = new MeshLabJS.Viewer(viewerElement);
 
-  document.getElementById('fileInput').addEventListener('change', async (e) => {
+  fileInput.addEventListener('change', async (e) => {
     const file = e.target.files[0];
     if (!file) return;
 
-    const arrayBuffer = await file.arrayBuffer();
-    const blob = new Blob([arrayBuffer], { type: 'application/octet-stream' });
-    const fileObj = new File([blob], file.name, { type: 'application/octet-stream' });
+    const buffer = await file.arrayBuffer();
 
-    await viewer.loadMeshFile(fileObj);
-    viewer.resetView();
+    try {
+      await viewer.loadMeshFromBuffer(buffer, file.name);
+      viewer.resetView();
+    } catch (error) {
+      alert("Ошибка загрузки STL: " + error.message);
+      console.error(error);
+    }
   });
 </script>
 
